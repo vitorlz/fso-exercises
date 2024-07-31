@@ -11,17 +11,17 @@ sequenceDiagram
 
   Note right of browser: The server responds with a URL redirect, asking the browser to send a GET request to /notes
 
-  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/new_note/notes
+  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes
   activate server
   server-->> browser: HTML file
   deactivate server
 
-  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/new_note/main.css
+  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
   activate server
   server-->> browser: CSS file
   deactivate server
 
-  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/new_note/main.js
+  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
   activate server
   server-->> browser: javascript file
   deactivate server
