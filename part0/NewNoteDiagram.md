@@ -26,4 +26,9 @@ sequenceDiagram
   server-->> browser: javascript file
   deactivate server
 
+  browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+  activate server
+  server-->> browser: js function is executed, which renders the notes
+  deactivate server
+
 ```
