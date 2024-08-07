@@ -1,4 +1,3 @@
-import {useState} from 'react'
 import StatisticLine from './StatisticLine'
 
 const Statistics = ({good, neutral, bad, all, average, positive}) => {
