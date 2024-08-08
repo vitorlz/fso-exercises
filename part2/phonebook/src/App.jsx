@@ -1,36 +1,60 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SearchFilter from './Components/SearchFilter'
 import AddPersonForm from './Components/AddPersonForm'
 import PersonList from './Components/PersonList'
+import axios from 'axios'
+import personService from './services/persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
-  const [filteredList, setFiltered] = useState([...persons])
+  const [filteredList, setFiltered] = useState([])
 
-  const addName = (event) => {
+  useEffect(() => {
+    
+    personService.getAll().then(initialPersons => {
+      setPersons(initialPersons)
+      setFiltered(initialPersons)
+    })
+
+  }, [])
+
+  const addPerson = (event) => {
     event.preventDefault()
     const findDuplicate = persons.filter(person => person.name.trim() === newName.trim())
+    const newPerson = {
+      name: newName,
+      number: newNumber
+    }
 
     if(findDuplicate.length === 0){
-      const updatedPersons = [...persons, {name: newName, number: newNumber}]
-      setPersons(updatedPersons)
-      setNewName('')
-      setNewNumber('')
-      setFiltered(updatedPersons.filter(person => person
-        .name
-        .toLowerCase()
-        .includes(search.toLowerCase())))
+
+      personService.create(newPerson).then(returnedPerson => {
+        const updatedPersons = [...persons, returnedPerson]
+        setPersons(updatedPersons)
+        setNewName('')
+        setNewNumber('')
+        setFiltered(updatedPersons.filter(person => person
+          .name
+          .toLowerCase()
+          .includes(search.toLowerCase())))
+        console.log(updatedPersons)
+      })
     } 
     else {
-      alert(`${newName} is already added to phonebook`)
+      const confirmationMsg = `${newName} is already added to phonebook, replace the old number with a new one?`
+
+      if(confirm(confirmationMsg)) {
+        const newNameId = findDuplicate[0].id
+
+        personService.update(newNameId, newPerson).then(returnedPerson => {
+          setPersons(persons.map(person => person.id !== newNameId ? person : returnedPerson))
+          setFiltered(persons.map(person => person.id !== newNameId ? person : returnedPerson))
+        })
+
+      }
     }
   
   }
@@ -51,19 +75,31 @@ const App = () => {
       .includes(event.target.value.toLowerCase())))
   }
 
+  const handleDeletion = (id) => {
+    
+    const toBeDeleted = persons.find(person => person.id === id).name
+
+    if(confirm(`Delete ${toBeDeleted}?`)){
+      personService.deleteById(id).then(returnedPerson => {
+        setPersons(persons.filter(person => person.id !== id))
+        setFiltered(persons.filter(person => person.id !== id))
+      })
+    }
+  }
+
   return(
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
       <SearchFilter value={search} onChange={handleSearch} />
-      <h1>Add a new person</h1>
+      <h2>Add a new person</h2>
       <AddPersonForm 
-        addName={addName} 
+        addPerson={addPerson} 
         newName={newName} 
         handleNameChange={handleNameChange} 
         newNumber={newNumber}
         handleNumberChange={handleNumberChange} />
       <h2>Numbers</h2>
-      <PersonList list={filteredList}/>
+      <PersonList list={filteredList} handleDeletion={handleDeletion}/>
     </div>
   )
 }
