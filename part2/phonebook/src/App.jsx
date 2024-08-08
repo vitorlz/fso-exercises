@@ -4,6 +4,7 @@ import AddPersonForm from './Components/AddPersonForm'
 import PersonList from './Components/PersonList'
 import axios from 'axios'
 import personService from './services/persons'
+import Notification from './Components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -11,6 +12,12 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
   const [filteredList, setFiltered] = useState([])
+  const [notification, setNotification] = useState(
+    {
+      msg: null,
+      color: null
+    }
+  )
 
   useEffect(() => {
     
@@ -40,7 +47,15 @@ const App = () => {
           .name
           .toLowerCase()
           .includes(search.toLowerCase())))
-        console.log(updatedPersons)
+        setNotification(
+          {
+            msg: `Added ${newName}`,
+            color: "green"
+          }
+        )
+        setTimeout(() => {
+          setNotification({ msg: null, color: null })
+        }, 5000)
       })
     } 
     else {
@@ -52,10 +67,32 @@ const App = () => {
         personService.update(newNameId, newPerson).then(returnedPerson => {
           setPersons(persons.map(person => person.id !== newNameId ? person : returnedPerson))
           setFiltered(persons.map(person => person.id !== newNameId ? person : returnedPerson))
+          setNotification(
+            {
+              msg: `Updated ${newName}'s number`,
+              color: 'green'
+            }
+          )
+          setTimeout(() => {
+            setNotification({ msg: null, color: null })
+          }, 5000)
+        })
+        .catch(error => {
+          setNotification( 
+            {
+              msg: `Information of ${newName} has already been removed from the server`,
+              color: 'red'
+            }
+          )
+          setPersons(persons.filter(p => p.id !== newNameId))
+          setFiltered(persons.filter(p => p.id !== newNameId))
+          setTimeout(() => {
+            setNotification({ msg: null, color: null })
+          }, 5000)
         })
 
-      }
     }
+  }
   
   }
 
@@ -90,6 +127,7 @@ const App = () => {
   return(
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notification.msg} color={notification.color} />
       <SearchFilter value={search} onChange={handleSearch} />
       <h2>Add a new person</h2>
       <AddPersonForm 
