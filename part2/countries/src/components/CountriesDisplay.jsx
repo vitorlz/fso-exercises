@@ -1,6 +1,6 @@
 import CountryView from "./CountryView"
 
-const CountriesDisplay = ({ countriesList, onClick, show, countryIndex}) => {
+const CountriesDisplay = ({ countriesList, onClick, show, countryIndex, weather, setWeather}) => {
     
     if (countriesList.length > 10){
         return(
@@ -24,7 +24,10 @@ const CountriesDisplay = ({ countriesList, onClick, show, countryIndex}) => {
         } 
         else {
             return (
-                <CountryView countriesList={countriesList} index={countryIndex}/>
+                <CountryView countriesList={countriesList} 
+                    index={countryIndex} 
+                    weather={weather} 
+                    setWeather={setWeather} />
             ) 
         }
         
@@ -32,11 +35,12 @@ const CountriesDisplay = ({ countriesList, onClick, show, countryIndex}) => {
     else if (countriesList.length === 1) {
 
         return(
-            <CountryView countriesList={countriesList} index={countryIndex}/>
+            <CountryView countriesList={countriesList} 
+                index={countryIndex} 
+                weather={weather} 
+                setWeather={setWeather}/>
         )
     }
-
-    
 }
 
 export default CountriesDisplay

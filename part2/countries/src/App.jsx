@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import countryService from './services/countries'
 import Filter from './components/Filter'
 import CountriesDisplay from './components/CountriesDisplay'
+import axios from 'axios'
 
 function App() {
  
@@ -9,6 +10,7 @@ function App() {
   const [countries, setCountries] = useState([])
   const [show, setShow] = useState(false)
   const [countryIndex, setCountryIndex] = useState(0)
+  const [weather, setWeather] = useState({ temperature: null, wind: null, icon: null })
 
   useEffect(() => {
     
@@ -41,14 +43,17 @@ function App() {
     setCountryIndex(index)
     
   }
+
   
   return(
   <div>
     <Filter value={search} onChange={handleFilterChange} />
     <CountriesDisplay countriesList={countries} 
-                      onClick={handleShowOnClick} 
-                      show={show} 
-                      countryIndex={countryIndex} />
+      onClick={handleShowOnClick} 
+      show={show} 
+      countryIndex={countryIndex}
+      weather={weather}
+      setWeather={setWeather} />
   </div>
  )
 }
