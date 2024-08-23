@@ -70,8 +70,6 @@ const mostLikes = (blogs) => {
 
     const result = authorsArray.find(author => author.likes === max)
 
-    console.log(result)
-
     return result
 }
 
