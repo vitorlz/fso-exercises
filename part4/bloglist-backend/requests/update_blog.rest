@@ -1,0 +1,7 @@
+PUT http://localhost:3003/api/blogs/66bfef4a3ec639e52df2d084
+Content-Type: application/json
+
+{
+    "url": "woodworkissng.com",
+    "likes": 12
+}

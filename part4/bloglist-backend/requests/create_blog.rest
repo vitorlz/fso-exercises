@@ -1,9 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJvYjEyMyIsImlkIjoiNjZjZDY4OGVjMzI3ZWYyNDg2NWIzNTIzIiwiaWF0IjoxNzI0NzQyNDk2fQ.oPc_ogPzd-UFU5hWJz2NR7a1bBQpBR108htPLZbwY5w
 
 {
-    "title": "Cooking Blog",
-    "author": "Bob",
-    "url": "cookingblog.com",
-    "likes": 5
+    "title": "Tech Blog",
+    "author": "Carl",
+    "url": "dogblog.com",
+    "likes": 16
 }
