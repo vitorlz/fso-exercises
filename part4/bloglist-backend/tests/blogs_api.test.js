@@ -406,8 +406,6 @@ describe('when there is initially one user in the db', () => {
         assert(!usernames.includes(result.body.username))
         assert(result.body.error.includes('validation error, password too short'))
     })
-
-
 })
 
 after(() => {

@@ -36,41 +36,24 @@ const App = () => {
       number: newNumber
     }
 
+    console.log(newPerson)
+
     if(findDuplicate.length === 0){
 
-      personService.create(newPerson).then(returnedPerson => {
-        const updatedPersons = [...persons, returnedPerson]
-        setPersons(updatedPersons)
-        setNewName('')
-        setNewNumber('')
-        setFiltered(updatedPersons.filter(person => person
-          .name
-          .toLowerCase()
-          .includes(search.toLowerCase())))
-        setNotification(
-          {
-            msg: `Added ${newName}`,
-            color: "green"
-          }
-        )
-        setTimeout(() => {
-          setNotification({ msg: null, color: null })
-        }, 5000)
-      })
-    } 
-    else {
-      const confirmationMsg = `${newName} is already added to phonebook, replace the old number with a new one?`
-
-      if(confirm(confirmationMsg)) {
-        const newNameId = findDuplicate[0].id
-
-        personService.update(newNameId, newPerson).then(returnedPerson => {
-          setPersons(persons.map(person => person.id !== newNameId ? person : returnedPerson))
-          setFiltered(persons.map(person => person.id !== newNameId ? person : returnedPerson))
+      personService.create(newPerson)
+        .then(returnedPerson => {
+          const updatedPersons = [...persons, returnedPerson]
+          setPersons(updatedPersons)
+          setNewName('')
+          setNewNumber('')
+          setFiltered(updatedPersons.filter(person => person
+            .name
+            .toLowerCase()
+            .includes(search.toLowerCase())))
           setNotification(
             {
-              msg: `Updated ${newName}'s number`,
-              color: 'green'
+              msg: `Added ${newName}`,
+              color: "green"
             }
           )
           setTimeout(() => {
@@ -78,18 +61,50 @@ const App = () => {
           }, 5000)
         })
         .catch(error => {
-          setNotification( 
-            {
-              msg: `Information of ${newName} has already been removed from the server`,
-              color: 'red'
-            }
-          )
-          setPersons(persons.filter(p => p.id !== newNameId))
-          setFiltered(persons.filter(p => p.id !== newNameId))
+          setNotification({ msg: error.response.data.error, color: 'red' })
+
           setTimeout(() => {
             setNotification({ msg: null, color: null })
           }, 5000)
         })
+    } 
+    else {
+      const confirmationMsg = `${newName} is already added to phonebook, replace the old number with a new one?`
+
+      if(confirm(confirmationMsg)) {
+        const newNameId = findDuplicate[0].id
+
+        console.log(newNameId)
+
+        personService.update(newNameId, newPerson)
+          .then(returnedPerson => {
+            
+            if(!returnedPerson) {
+              setNotification({ msg: `${newName} was already removed`, color: 'red' })
+              setTimeout(() => {
+                setNotification({ msg: null, color: null })
+              }, 5000)
+            } else {
+              setPersons(persons.map(person => person.id !== newNameId ? person : returnedPerson))
+              setFiltered(persons.map(person => person.id !== newNameId ? person : returnedPerson))
+              setNotification(
+                {
+                  msg: `Updated ${newName}'s number`,
+                  color: 'green'
+                }
+              )
+              setTimeout(() => {
+                setNotification({ msg: null, color: null })
+              }, 5000)
+            }
+          })
+          .catch(error => {
+            setNotification({ msg: error.response.data.error, color: 'red' })
+
+            setTimeout(() => {
+              setNotification({ msg: null, color: null })
+            }, 5000)
+          })
 
     }
   }
