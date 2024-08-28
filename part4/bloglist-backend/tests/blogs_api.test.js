@@ -14,11 +14,39 @@ const api = supertest(app)
 describe('when there are initially some blogs saved', () => {
     beforeEach(async () => {
         await Blog.deleteMany({})
+        await User.deleteMany({})
         
         const blogsObject = helper.initialBlogs.map(blog => new Blog(blog))
         const promiseArray = blogsObject.map(b => b.save())
     
         await Promise.all(promiseArray)
+
+        const passwordHash = await bcrypt.hash('test123', 10)
+
+        const userObject = new User (
+            {
+                username: 'test',
+                name: 'Test Name',
+                passwordHash
+            }
+        )
+
+        const savedUser = await userObject.save()
+
+        const blog = new Blog(
+            {
+                title: "Test Blog",
+                author: "test",
+                url: "testblog.com",
+                likes: 2, 
+                user: savedUser._id
+            }
+        )
+
+        const result = await blog.save()
+        savedUser.blogs = savedUser.blogs.concat(result._id)
+
+        await userObject.save()
     })
 
     test('correct amount of blog posts are returned', async () => {
@@ -37,7 +65,15 @@ describe('when there are initially some blogs saved', () => {
     })
 
     describe('saving a blog', () => {
-        test('succeeds if the data is valid', async () => {
+        test('succeeds if the data and token are valid', async () => {
+            const loginResponse = await api 
+                .post('/api/login')
+                .send({ username: 'test', password: 'test123' })
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+
+            const token = loginResponse.body.token
+
             const newBlog = {
                 title: "Canonical string reduction",
                 author: "Edsger W. Dijkstra",
@@ -48,6 +84,7 @@ describe('when there are initially some blogs saved', () => {
             await api  
                 .post('/api/blogs')
                 .send(newBlog)
+                .set('Authorization', `Bearer ${token}`)
                 .expect(201)
                 .expect('Content-Type', /application\/json/)
         
@@ -59,6 +96,14 @@ describe('when there are initially some blogs saved', () => {
         })
         
         test('succeeds if the likes property is missing and defaults likes to 0', async () => {
+            const loginResponse = await api 
+                .post('/api/login')
+                .send({ username: 'test', password: 'test123' })
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+            
+            const token = loginResponse.body.token
+
             const newBlog = {
                 title: "Canonical string reduction",
                 author: "Edsger W. Dijkstra",
@@ -68,14 +113,29 @@ describe('when there are initially some blogs saved', () => {
             const postedBlog = await api
                 .post('/api/blogs')
                 .send(newBlog)
+                .set('Authorization', `Bearer ${token}`)
                 .expect(201)
                 .expect('Content-Type', /application\/json/)
+            
+            const blogsAtEnd = await api.get('/api/blogs')
+            const titles = blogsAtEnd.body.map(b => b.title)
         
             assert(Object.keys(postedBlog.body).includes('likes'))
             assert.strictEqual(postedBlog.body.likes, 0)
+            assert(titles.includes(newBlog.title))
+            assert(blogsAtEnd.body.length, helper.initialBlogs.length + 1)
         })
         
         test('sends 400 Bad Request if title is missing', async () => {
+
+            const loginResponse = await api 
+                .post('/api/login')
+                .send({ username: 'test', password: 'test123' })
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+        
+            const token = loginResponse.body.token
+
             const newBlog = {
                 author: "Edsger W. Dijkstra",
                 url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
@@ -83,6 +143,7 @@ describe('when there are initially some blogs saved', () => {
         
             await api 
                 .post('/api/blogs')
+                .set('Authorization', `Bearer ${token}`)
                 .send(newBlog)
                 .expect(400)
             
@@ -91,7 +152,15 @@ describe('when there are initially some blogs saved', () => {
             assert(blogsAtEnd.body.length, helper.initialBlogs.length)
         })
         
-        test('sends 400 Bad Request if url is missing', async () => {
+        test('sends 400 Bad Request if url is missing', async () => { 
+            const loginResponse = await api 
+                .post('/api/login')
+                .send({ username: 'test', password: 'test123' })
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+        
+            const token = loginResponse.body.token
+
             const newBlog = {
                 title: "Canonical string reduction",
                 author: "Edsger W. Dijkstra",
@@ -99,9 +168,29 @@ describe('when there are initially some blogs saved', () => {
             
             await api 
                 .post('/api/blogs')
+                .set('Authorization', `Bearer ${token}`)
                 .send(newBlog)
                 .expect(400)
+                
+            const blogsAtEnd = await api.get('/api/blogs')
         
+            assert(blogsAtEnd.body.length, helper.initialBlogs.length)
+        })
+
+        test('sends 401 Unauthorized if a valid token is not provided', async () => { 
+
+            const newBlog = {
+                title: "Canonical string reduction",
+                author: "Edsger W. Dijkstra",
+                url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+                likes: 12,
+            }
+            
+            await api 
+                .post('/api/blogs')
+                .send(newBlog)
+                .expect(401)
+                
             const blogsAtEnd = await api.get('/api/blogs')
         
             assert(blogsAtEnd.body.length, helper.initialBlogs.length)
@@ -110,6 +199,7 @@ describe('when there are initially some blogs saved', () => {
     
     describe('deleting a blog', () => {
         test('succeeds when id is valid', async () => {
+
             const blogsAtStart = await api.get('/api/blogs')
             const validId = blogsAtStart.body[0].id 
 
