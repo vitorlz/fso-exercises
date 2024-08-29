@@ -1,7 +1,11 @@
 PUT http://localhost:3003/api/blogs/66bfef4a3ec639e52df2d084
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJvYjEyMyIsImlkIjoiNjZjZDY4OGVjMzI3ZWYyNDg2NWIzNTIzIiwiaWF0IjoxNzI0OTU0MzI0fQ.1C5ro9hVWRPBUhyNlBZiYdgtJyDC_H81A7z6nrjWJg4
 
 {
-    "url": "woodworkissng.com",
-    "likes": 12
+    "title": "Cooking Blog",
+    "author": "Bob",
+    "url": "cookingblog.com",
+    "likes": 5,
+    "user": "66cd64ae40cc80f822486972"
 }
