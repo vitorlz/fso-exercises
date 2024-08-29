@@ -15,7 +15,7 @@ const App = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
-  const [message, setMessage] = useState('')
+  const [notification, setNotification] = useState({message: '', isError: false})
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -49,9 +49,19 @@ const App = () => {
       setPassword('')
     } catch (error) {
       console.log(error)
-      setMessage(`Wrong username or password`)
+      setNotification(
+        {
+          message: 'Wrong password or username',
+          isError: true
+        }
+      )
         setTimeout(() => {
-          setMessage('')
+          setNotification(
+            {
+              message: '',
+              isError: false
+            }
+          )
       }, 5000)
     }
   }
@@ -60,6 +70,20 @@ const App = () => {
     window.localStorage.removeItem('loggedBloglistUser')
     setUser(null)
     blogService.setToken(null)
+    setNotification(
+      {
+        message: 'Logout successful',
+        isError: false
+      }
+    )
+      setTimeout(() => {
+        setNotification(
+          {
+            message: '',
+            isError: false
+          }
+        )
+    }, 5000)
   }
 
   const addBlog = async (event) => {
@@ -78,19 +102,38 @@ const App = () => {
       setAuthor('')
       setUrl('')
       if(result) {
-        setMessage(`${newBlog.title} by ${newBlog.author} was added`)
+        setNotification(
+          {
+            message: `${newBlog.title} by ${newBlog.author} was added`,
+            isError: false
+          }
+        )
         setTimeout(() => {
-          setMessage('')
+          setNotification(
+            {
+              message: '',
+              isError: false
+            }
+          )
         }, 5000)
       }
     } catch (error) {
       console.log(error)
-      setMessage('Error adding blog')
+      setNotification(
+        {
+          message: 'Error adding blog',
+          isError: true
+        }
+      )
         setTimeout(() => {
-          setMessage('')
+          setNotification(
+            {
+              message: '',
+              isError: false
+            }
+          )
       }, 5000)
     }
-    
   }
 
   return (
@@ -98,7 +141,7 @@ const App = () => {
       { user === null ?
         <div> 
           <h2>log into application</h2>
-          <Notification message={message} />
+          <Notification notification={notification} />
           <LoginForm 
             username={username}
             setUsername={setUsername}
@@ -109,7 +152,7 @@ const App = () => {
         </div> :
         <div> 
           <h2>blogs</h2>
-          <Notification message={message} />
+          <Notification notification={notification} />
           <div>
               {user.name} logged in
               <button onClick={handleOnLogout}>logout</button>
