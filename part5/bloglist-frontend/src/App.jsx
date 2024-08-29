@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -6,20 +6,20 @@ import LoginForm from './components/LoginForm'
 import BlogList from './components/BlogList'
 import AddBlogForm from './components/AddBlogForm'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
   const [notification, setNotification] = useState({message: '', isError: false})
+
+  const blogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs(blogs)
     ) 
   }, [])
 
@@ -86,21 +86,12 @@ const App = () => {
     }, 5000)
   }
 
-  const addBlog = async (event) => {
-    event.preventDefault()
-    const newBlog = {
-      title,
-      author,
-      url
-    }
-  
+  const addBlog = async (newBlog) => {
     try {
       const result = await blogService.create(newBlog)
       const updatedBlogs = blogs.concat(result)
-      setBlogs(updatedBlogs)
-      setTitle('')
-      setAuthor('')
-      setUrl('')
+      blogFormRef.current.toggleVisibility()
+      setBlogs(blogs => blogs = updatedBlogs)
       if(result) {
         setNotification(
           {
@@ -136,6 +127,26 @@ const App = () => {
     }
   }
 
+  const handleOnLike = async (blog) => {
+    const currentBlogs = blogs
+    const blogToBeUpdated = blogs.find(b => b.id === blog.id)
+    const index = blogs.indexOf(blogToBeUpdated)
+    
+    currentBlogs[index] = { ...blogToBeUpdated, likes: blogToBeUpdated.likes + 1 }
+
+    const updatedBlog = { ...currentBlogs[index], user: blog.user.id }
+
+    await blogService.update(blog.id, updatedBlog)
+    setBlogs([...currentBlogs])
+  }
+
+  const handleOnDelete = async (blog) => {
+    if(window.confirm(`Remove ${blog.title} by ${blog.author}?`)){
+      await blogService.deleteBlog(blog.id)
+      setBlogs(blogs.filter(b => b.id !== blog.id))
+    }
+  }
+
   return (
     <div>
       { user === null ?
@@ -157,16 +168,17 @@ const App = () => {
               {user.name} logged in
               <button onClick={handleOnLogout}>logout</button>
           </div>
-          <AddBlogForm 
-            title={title} 
-            author={author} 
-            url={url}
-            setTitle={setTitle}
-            setAuthor={setAuthor}
-            setUrl={setUrl}
-            addBlog={addBlog}
+          <Togglable buttonLabel='new blog' ref={blogFormRef}>
+            <AddBlogForm 
+              createBlog={addBlog}
+            />
+          </Togglable>
+          <BlogList 
+            blogs={[...blogs].sort((a, b) => b.likes - a.likes)} 
+            user={user}
+            handleOnLike={handleOnLike} 
+            handleOnDelete={handleOnDelete}
           />
-          <BlogList blogs={blogs} />
         </div>  
       }
     </div>
