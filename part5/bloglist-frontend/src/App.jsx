@@ -13,14 +13,14 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [notification, setNotification] = useState({message: '', isError: false})
+  const [notification, setNotification] = useState({ message: '', isError: false })
 
   const blogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs(blogs)
-    ) 
+    )
   }, [])
 
   useEffect(() => {
@@ -55,13 +55,13 @@ const App = () => {
           isError: true
         }
       )
-        setTimeout(() => {
-          setNotification(
-            {
-              message: '',
-              isError: false
-            }
-          )
+      setTimeout(() => {
+        setNotification(
+          {
+            message: '',
+            isError: false
+          }
+        )
       }, 5000)
     }
   }
@@ -76,13 +76,13 @@ const App = () => {
         isError: false
       }
     )
-      setTimeout(() => {
-        setNotification(
-          {
-            message: '',
-            isError: false
-          }
-        )
+    setTimeout(() => {
+      setNotification(
+        {
+          message: '',
+          isError: false
+        }
+      )
     }, 5000)
   }
 
@@ -116,13 +116,13 @@ const App = () => {
           isError: true
         }
       )
-        setTimeout(() => {
-          setNotification(
-            {
-              message: '',
-              isError: false
-            }
-          )
+      setTimeout(() => {
+        setNotification(
+          {
+            message: '',
+            isError: false
+          }
+        )
       }, 5000)
     }
   }
@@ -131,7 +131,7 @@ const App = () => {
     const currentBlogs = blogs
     const blogToBeUpdated = blogs.find(b => b.id === blog.id)
     const index = blogs.indexOf(blogToBeUpdated)
-    
+
     currentBlogs[index] = { ...blogToBeUpdated, likes: blogToBeUpdated.likes + 1 }
 
     const updatedBlog = { ...currentBlogs[index], user: blog.user.id }
@@ -150,36 +150,36 @@ const App = () => {
   return (
     <div>
       { user === null ?
-        <div> 
+        <div>
           <h2>log into application</h2>
           <Notification notification={notification} />
-          <LoginForm 
+          <LoginForm
             username={username}
             setUsername={setUsername}
-            setPassword={setPassword} 
-            password={password} 
+            setPassword={setPassword}
+            password={password}
             onSubmit={handleLogin}
-          /> 
+          />
         </div> :
-        <div> 
+        <div>
           <h2>blogs</h2>
           <Notification notification={notification} />
           <div>
-              {user.name} logged in
-              <button onClick={handleOnLogout}>logout</button>
+            {user.name} logged in
+            <button onClick={handleOnLogout}>logout</button>
           </div>
           <Togglable buttonLabel='new blog' ref={blogFormRef}>
-            <AddBlogForm 
+            <AddBlogForm
               createBlog={addBlog}
             />
           </Togglable>
-          <BlogList 
-            blogs={[...blogs].sort((a, b) => b.likes - a.likes)} 
+          <BlogList
+            blogs={[...blogs].sort((a, b) => b.likes - a.likes)}
             user={user}
-            handleOnLike={handleOnLike} 
+            handleOnLike={handleOnLike}
             handleOnDelete={handleOnDelete}
           />
-        </div>  
+        </div>
       }
     </div>
   )

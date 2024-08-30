@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
+import PropTypes from 'prop-types'
 
-const Blog = ({ blog, user, handleOnLike, handleOnDelete}) => {
+const Blog = ({ blog, user, handleOnLike, handleOnDelete }) => {
 
   const [visible, setVisible] = useState(false)
 
@@ -22,15 +23,15 @@ const Blog = ({ blog, user, handleOnLike, handleOnDelete}) => {
   return(
     <div style={outerStyle}>
       <div  style={{ marginBottom: 0 }}>
-        {blog.title} by {blog.author} 
+        {blog.title} by {blog.author}
         <button style={{ marginLeft: '5px' }} onClick={() => setVisible(!visible)}>
           {visible ? 'hide' : 'view'}
         </button>
       </div>
       <div style={innerStyle}>
-        {blog.url} 
+        {blog.url}
         <br />
-        likes: {blog.likes} 
+        likes: {blog.likes}
         <button style={{ marginLeft: '5px' }} onClick={() => handleOnLike(blog)}>
           like
         </button>
@@ -43,11 +44,17 @@ const Blog = ({ blog, user, handleOnLike, handleOnDelete}) => {
           null
         }
       </div>
-    </div> 
+    </div>
   )
 }
 
-  
+Blog.propTypes = {
+  blog: PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired,
+  handleOnLike: PropTypes.func.isRequired,
+  handleOnDelete: PropTypes.func.isRequired,
+}
+
 
 
 export default Blog
